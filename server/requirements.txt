@@ -1,0 +1,10 @@
+python-dotenv # for environment variable management
+mypy # for static type checking
+pydantic # for data validation and settings management
+
+azure-ai-textanalytics # Azure AI Language Service
+azure-core
+
+fastapi # PythonWeb framework
+
+uvicorn # for running the FastAPI application
