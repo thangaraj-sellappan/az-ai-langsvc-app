@@ -49,3 +49,10 @@ pip install -r requirements.txt
 ```bash
 uvicorn src.main:app --reload
 ```
+
+### Run using docker
+# Build the image
+docker build -t az-ai-langsvc-app .
+
+# Run the container
+docker run -p 8000:8000 az-ai-langsvc-app
