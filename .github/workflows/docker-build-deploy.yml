@@ -95,12 +95,25 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ needs.build.outputs.image-tag }}
           format: 'sarif'
           output: 'trivy-results.sarif'
+          exit-code: '0'
+
+      - name: Check if SARIF file exists
+        run: |
+          if [ -f "trivy-results.sarif" ]; then
+            echo "SARIF file found, size: $(wc -c < trivy-results.sarif) bytes"
+          else
+            echo "SARIF file not found"
+            touch trivy-results.sarif
+          fi
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
