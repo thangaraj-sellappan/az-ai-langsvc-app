@@ -45,4 +45,4 @@ docker run -p 8000:8000 ai-text-analyzer
 ```
 
 # Demo Screenshot
-![alt text](artifacts\images\image.png)
+![alt text](artifacts/images/image.png)
