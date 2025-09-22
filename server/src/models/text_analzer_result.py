@@ -1,4 +1,4 @@
-from typing import List, TypeVar, Generic, Optional
+from typing import List, TypeVar, Generic, Optional, Union
 from pydantic import BaseModel, ConfigDict
 from pydantic.generics import GenericModel
 
@@ -16,7 +16,7 @@ class AnalyzeSentimentDto(BaseModel):
 class PiiEntityDto(BaseModel):
     category: str
     confidence_score: float
-    subcategory: str | None = None
+    subcategory: Optional[str] = None
     offset: int
     length: int
 
@@ -59,12 +59,12 @@ class TextAnalyzerResponse(BaseModel):
     input_text: str = None
     error: Optional[str] = None
     redacted_text: Optional[str] = None
-    lang: TextAnalyzerResultWrapper[DetectLanguageDto] | None = None
-    sentiment: TextAnalyzerResultWrapper[AnalyzeSentimentDto] | None = None
-    pii: TextAnalyzerResultWrapper[List[PiiEntityDto]] | None = None
-    key_phrases: TextAnalyzerResultWrapper[KeyPhraseDto] | None = None
-    entities: TextAnalyzerResultWrapper[List[EntityDto]] | None = None
-    linked_entities: TextAnalyzerResultWrapper[List[LinkedEntityDto]] | None = None
+    lang: Optional[TextAnalyzerResultWrapper[DetectLanguageDto]] = None
+    sentiment: Optional[TextAnalyzerResultWrapper[AnalyzeSentimentDto]] = None
+    pii: Optional[TextAnalyzerResultWrapper[List[PiiEntityDto]]] = None
+    key_phrases: Optional[TextAnalyzerResultWrapper[KeyPhraseDto]] = None
+    entities: Optional[TextAnalyzerResultWrapper[List[EntityDto]]] = None
+    linked_entities: Optional[TextAnalyzerResultWrapper[List[LinkedEntityDto]]] = None
 
     model_config = ConfigDict(
         arbitrary_types_allowed=False,

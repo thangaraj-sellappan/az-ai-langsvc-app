@@ -24,7 +24,7 @@ def analyze_text(documents: List[str]) -> List[TextAnalyzerResponse]:
 
     if len(lang_response) == 0 or lang_response[0].is_error:
         error = "Unknown error" if len(lang_response) == 0 else safe_get(lang_response[0], 'error', 'message', default="Unknown error")
-        return List[TextAnalyzerResponse(input_text=documents[0], has_error=True, error=error)]
+        return [TextAnalyzerResponse(input_text=documents[0], has_error=True, error=error)]
 
     language = lang_response[0].primary_language.iso6391_name if lang_response else "en"
     setiment_response: List[Union[AnalyzeSentimentResult, DocumentError]] = text_analytics_client.analyze_sentiment(documents, language=language)
@@ -62,58 +62,71 @@ def analyze_text(documents: List[str]) -> List[TextAnalyzerResponse]:
                 confidence_score = lang.primary_language.confidence_score
             )
         )
-        text_analytics_result.sentiment = TextAnalyzerResultWrapper[AnalyzeSentimentDto](
-            result = AnalyzeSentimentDto(
-                sentiment = sentiment.sentiment,
-                confidence_score = sentiment.confidence_scores.positive
+        if not sentiment.is_error:
+            text_analytics_result.sentiment = TextAnalyzerResultWrapper[AnalyzeSentimentDto](
+                result = AnalyzeSentimentDto(
+                    sentiment = sentiment.sentiment,
+                    confidence_score = sentiment.confidence_scores.positive
+                )
             )
-        )
+        else:
+            text_analytics_result.sentiment = TextAnalyzerResultWrapper[AnalyzeSentimentDto](
+                has_error=True,
+                error="Sentiment analysis failed"
+            )
         text_analytics_result.pii = TextAnalyzerResultWrapper[List[PiiEntityDto]](result = [])
-        for entity in pii.entities:
-            text_analytics_result.pii.result.append(PiiEntityDto(
-                category=entity.category,
-                confidence_score=entity.confidence_score,
-                offset=entity.offset,
-                length=entity.length,
-                subcategory=entity.subcategory
-            )
-        )
+        if not pii.is_error:
+            for entity in pii.entities:
+                text_analytics_result.pii.result.append(PiiEntityDto(
+                    category=entity.category,
+                    confidence_score=entity.confidence_score,
+                    offset=entity.offset,
+                    length=entity.length,
+                    subcategory=entity.subcategory
+                ))
+        else:
+            text_analytics_result.pii.has_error = True
+            text_analytics_result.pii.error = "PII analysis failed"
 
         text_analytics_result.key_phrases = TextAnalyzerResultWrapper[KeyPhraseDto](
             result = KeyPhraseDto(key_phrases=key_phrases.key_phrases if not key_phrases.is_error else [])
         )
 
         text_analytics_result.entities = TextAnalyzerResultWrapper[List[EntityDto]](result = [])
-        for entity in entities.entities:
-            text_analytics_result.entities.result.append(EntityDto(
-                category=entity.category,
-                confidence_score=entity.confidence_score,
-                offset=entity.offset,
-                length=entity.length
-            )
-        )
+        if not entities.is_error:
+            for entity in entities.entities:
+                text_analytics_result.entities.result.append(EntityDto(
+                    category=entity.category,
+                    confidence_score=entity.confidence_score,
+                    offset=entity.offset,
+                    length=entity.length
+                ))
+        else:
+            text_analytics_result.entities.has_error = True
+            text_analytics_result.entities.error = "Entity analysis failed"
         
         text_analytics_result.linked_entities = TextAnalyzerResultWrapper[List[LinkedEntityDto]](result = [])
-        for entity in linked_entities.entities:
-            matches = List[LinkedEntityDto]()
-            for match in entity.matches:
-                matches.append(LinkedEntityMatchDto(
-                    text=match.text,
-                    confidence_score=match.confidence_score,
-                    offset=match.offset,
-                    length=match.length
-                )
-            )
-            text_analytics_result.linked_entities.result.append(LinkedEntityDto(
-                name=entity.name,
-                category=entity.category,
-                confidence_score=entity.confidence_score,
-                offset=entity.offset,
-                length=entity.length,
-                data_source_entity_id=entity.data_source_entity_id,
-                matches=matches
-            )
-        )
+        if not linked_entities.is_error:
+            for entity in linked_entities.entities:
+                matches = []
+                for match in entity.matches:
+                    matches.append(LinkedEntityMatchDto(
+                        text=match.text,
+                        confidence_score=match.confidence_score,
+                        offset=match.offset,
+                        length=match.length
+                    ))
+                text_analytics_result.linked_entities.result.append(LinkedEntityDto(
+                    name=entity.name,
+                    language=entity.language or "en",
+                    url=entity.url or "",
+                    data_source=entity.data_source or "unknown",
+                    data_source_entity_id=entity.data_source_entity_id or "",
+                    matches=matches[0] if matches else LinkedEntityMatchDto(text="", confidence_score=0.0, offset=0, length=0)
+                ))
+        else:
+            text_analytics_result.linked_entities.has_error = True
+            text_analytics_result.linked_entities.error = "Linked entity analysis failed"
         result.append(text_analytics_result)
 
     return result

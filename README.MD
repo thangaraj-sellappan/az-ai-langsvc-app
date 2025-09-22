@@ -1,58 +1,48 @@
-# Azure Languge Service
-Demonstation of Azure Language Service cababilites using Python libraries and React front end application.
+# AI Text Analyzer
 
-## How to start the application?
+Real-time text analysis using Azure Language Service with React frontend and FastAPI backend.
 
-## Configuration environement vairables
-Modify `.env` file with actual values
-```ts
-APP_NAME=MyFastAPI
-ENV=development
-DEBUG=True
-AZ_AI_RESOURCE_KEY=
-AZ_AI_RESOURCE_ENDPOINT=
-```
- 
-## Setup React client application 
+## What it does?
+
+Analyzes text for:
+- **Language detection** - identifies the language
+- **Sentiment analysis** - positive/negative/neutral sentiment
+- **PII entities** - finds personal information
+- **Key phrases** - extracts important phrases
+- **Entities** - detects names, places, organizations
+- **Linked entities** - connects to external knowledge sources
+
+
+## How to start?
+
+### 1. Setup environment
+Create `.env` file with your Azure credentials:
 ```bash
+AZ_AI_RESOURCE_KEY=your-azure-key
+AZ_AI_RESOURCE_ENDPOINT=your-azure-endpoint
+```
+
+### 2. Start the client
+```bash
+cd client
 npm install
-npm run dev 
+npm run dev
 ```
 
-## Setup Python server application
-Frameworks: `FastAPI`
-
-### Create Phython environment using conda
-
-#### Download and Install Conda
-1. Downlad and install miniconda from its official website: https://www.anaconda.com/download/success
-2. Refer following commands to setup the Pything virtual environment using conda cli
-
+### 3. Start the server
 ```bash
+cd server
 conda create --name az-langsvc python=3.8
 conda activate az-langsvc
-```
-
-### Install requirements
-```bash
 pip install -r requirements.txt
-```
-
-### Run Python server app using following methods
-### Option 1: VS Code Setup
-1. Press `Ctrl+Shift+P` to open command palate and click `Python: Select Interpreter`
-2. Select your conda python virtual environnent `az-langsvc`
-3. Open VSCode debugger extention and Run the server application
-
-### Option 2: Run the application using CLI
-#### Run following command in the terminal
-```bash
 uvicorn src.main:app --reload
 ```
 
-### Run using docker
-# Build the image
-docker build -t az-ai-langsvc-app .
+### Using Docker
+```bash
+docker build -t ai-text-analyzer .
+docker run -p 8000:8000 ai-text-analyzer
+```
 
-# Run the container
-docker run -p 8000:8000 az-ai-langsvc-app
+# Demo Screenshot
+![alt text](artifacts\images\image.png)
